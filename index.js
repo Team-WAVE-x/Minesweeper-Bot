@@ -1,102 +1,60 @@
-const Discord = require("discord.js")
-const {MessageEmbed, MessageCollector} = require('discord.js')
-const client = new Discord.Client()
+/* eslint-disable curly */
 const setting = require('./setting.json')
-const prefix = "!"
-    
+const { Client, MessageEmbed } = require('discord.js')
+const client = new Client()
+const prefix = '!'
 
+const arr = create2DArray(10, 10)
+const spoiler = (str) => `||${str}||`
+const int2Emoji = (int) => spoiler([':zero:', ':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':bomb:'][int])
 
-client.on('ready', () => {
-    console.log("--Start--")
-});
-
-
-
-const create2DArray = (rows, columns) => {
-    var arr = new Array(rows);
-    for (var i = 0; i < rows; i++) {
-        arr[i] = new Array(columns);
-    }
-    return arr;
+function plusArr (i, j) {
+  if (
+    (i >= 0 && i <= 9) && (j >= 0 && j <= 9) &&
+    (!(arr[i][j] === 9))) arr[i][j]++
 }
 
-let arr = create2DArray(10, 10)
-
-const plusArr = (i, j) => {
-    if ((i >= 0 && i <= 9) && (j >= 0 && j <= 9) && (!(arr[i][j] == 9))) arr[i][j]++
-}
-
-const spoiler = (str) => {
-    return `||${str}||`
-}
-
-const int2Emoji = (int) => {
-    switch(int){
-        case 0:
-            return spoiler(':zero:')
-        case 1:
-            return spoiler(':one:')
-        case 2:
-            return spoiler(':two:')
-        case 3:
-            return spoiler(':three:')
-        case 4:
-            return spoiler(':four:')
-        case 5:
-            return spoiler(':five:')
-        case 6:
-            return spoiler(':six:')
-        case 9:
-            return spoiler(':bomb:')
-
-    }
-}
-
-
-
+client.on('ready', () => console.log('--Start--'))
 client.on('message', (msg) => {
-    if (msg.bot) return;
-    if (msg.content === `${prefix}start`){
-        for (let i = 0; i < 10; i++){
-            for (let j = 0; j < 10; j++){
-                arr[i][j] = 0
-            }
-        }
+  if (msg.author.bot) return
+  if (msg.content !== `${prefix}start`) return
 
-        for (let i = 0; i < 10; i++){
-            arr[Math.floor(Math.random() * 10)][Math.floor(Math.random() * 10)] = 9
-        }
-        
-        for (let i = 0; i < 10; i++){
-            for (let j = 0; j < 10; j++){
-                if (arr[i][j] == 9) {
-                    plusArr(i+1, j)
-                    plusArr(i+1, j+1)
-                    plusArr(i+1, j-1)
-                    plusArr(i-1, j)
-                    plusArr(i-1, j+1)
-                    plusArr(i-1, j-1)
-                    plusArr(i, j+1)
-                    plusArr(i, j-1)
-                }
-            }
-        }
+  for (let i = 0; i < 10; i++)
+    for (let j = 0; j < 10; j++)
+      arr[i][j] = 0
 
-        let print = ''
+  for (let i = 0; i < 10; i++)
+    arr[Math.floor(Math.random() * 10)][Math.floor(Math.random() * 10)] = 9
 
-        for (let i = 0; i < 10; i++){
-            for (let j = 0; j < 10; j++){
-                print += int2Emoji(arr[i][j])
-            }
-            print += "\n"
-        }
+  for (let i = 0; i < 10; i++)
+    for (let j = 0; j < 10; j++)
+      if (arr[i][j] === 9) {
+        plusArr(i + 1, j)
+        plusArr(i + 1, j + 1)
+        plusArr(i + 1, j - 1)
+        plusArr(i - 1, j)
+        plusArr(i - 1, j + 1)
+        plusArr(i - 1, j - 1)
+        plusArr(i, j + 1)
+        plusArr(i, j - 1)
+      }
 
-        
-        msg.channel.send(new MessageEmbed()
-            .setTitle('지뢰찾기')
-            .setDescription(print)
-        )
-    }
-});
+  let description = ''
+
+  for (let i = 0; i < 10; i++)
+    for (let j = 0; j < 10; j++)
+      description += int2Emoji(arr[i][j]) + (j > 8 ? '\n' : '')
+
+  msg.channel.send(new MessageEmbed({ title: '지뢰찾기', description }))
+})
 
 client.login(setting.token)
+// client.login(process.env.token)
+
+function create2DArray (rows, columns) {
+  const arr = new Array(rows)
+  for (let i = 0; i < rows; i++) {
+    arr[i] = new Array(columns)
+  }
+  return arr
+}
