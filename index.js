@@ -26,6 +26,32 @@ const plusArr = (i, j) => {
     if ((i >= 0 && i <= 9) && (j >= 0 && j <= 9) && (!(arr[i][j] == 9))) arr[i][j]++
 }
 
+const spoiler = (str) => {
+    return `||${str}||`
+}
+
+const int2Emoji = (int) => {
+    switch(int){
+        case 0:
+            return spoiler(':zero:')
+        case 1:
+            return spoiler(':one:')
+        case 2:
+            return spoiler(':two:')
+        case 3:
+            return spoiler(':three:')
+        case 4:
+            return spoiler(':four:')
+        case 5:
+            return spoiler(':five:')
+        case 6:
+            return spoiler(':six:')
+        case 9:
+            return spoiler(':bomb:')
+
+    }
+}
+
 
 
 client.on('message', (msg) => {
@@ -56,11 +82,11 @@ client.on('message', (msg) => {
             }
         }
 
-        let print
+        let print = ''
 
         for (let i = 0; i < 10; i++){
             for (let j = 0; j < 10; j++){
-                print += arr[i][j]
+                print += int2Emoji(arr[i][j])
             }
             print += "\n"
         }
