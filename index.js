@@ -7,7 +7,7 @@ const prefix = '!'
 const arr = create2DArray(10, 10)
 let bomb = 0
 const spoiler = (str) => `||${str}||`
-const int2Emoji = (int) => spoiler([':zero:', ':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':bomb:'][int])
+const int2Emoji = (int) => [':zero:', ':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':bomb:'][int]
 
 function plusArr (i, j) {
   if (
@@ -64,11 +64,8 @@ client.on('message', (msg) => {
 })
 
 client.on('messageReactionAdd', (react, user) => {
-  if (react.emoji.name === '1️⃣' && !user.bot){
-    spoilerMode(react.message)
-  } else if (react.emoji.name === '2️⃣' && !user.bot) {
-    confirmMode(react.message)
-  }
+  if (react.emoji.name === '1️⃣' && !user.bot) spoilerMode(react.message)
+  else if (react.emoji.name === '2️⃣' && !user.bot) confirmMode(react.message)
 })
 
 
@@ -77,30 +74,33 @@ client.login(setting.token)
 
 function create2DArray (rows, columns) {
   const arr = new Array(rows)
-  for (let i = 0; i < rows; i++) {
-    arr[i] = new Array(columns)
-  }
+  for (let i = 0; i < rows; i++) arr[i] = new Array(columns)
   return arr
 }
 
+// Spoiler Mode
 function spoilerMode(msg) {
   let description = ''
 
   for (let i = 0; i < 10; i++)
     for (let j = 0; j < 10; j++)
-      description += int2Emoji(arr[i][j]) + (j > 8 ? '\n' : '')
+      description += spoiler(int2Emoji(arr[i][j]) + (j > 8 ? '\n' : ''))
   description += `\\💣 : ${bomb}개`
   msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (스포일러 모드)', description }))
 }
 
+
+// Confirm Mode
 function confirmMode(msg) {
   msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (확인 모드)', description: '`!확인 (x좌표) (y좌표)`로 그 곳이 어느 숫자인지 살펴보세요!' }))
   const filter = m => m.content.startsWith(`${prefix}확인`)
   const collector = msg.channel.createMessageCollector(filter, { time: 150000 });
-  collector.on('collect', m => {
-    let x = m.content.split(' ')[1]
-    let y = m.content.split(' ')[2]
-    m.channel.send(int2Emoji(arr[y][x]))
+  collector.on('collect', m => { 
+    if (arr[m.content.split(' ')[2]][m.content.split(' ')[1]] === 9) {
+      dead(msg)
+      return
+    }
+    m.channel.send(int2Emoji(arr[m.content.split(' ')[2]][m.content.split(' ')[1]]))
   })
 
   collector.on('end', (collected) => {
@@ -108,4 +108,10 @@ function confirmMode(msg) {
       .setTitle('끝')
       .setDescription('끝입니다'))
   })
+}
+
+function dead(msg) {
+  msg.channel.send(new MessageEmbed()
+    .setTitle(':boom:펑!')
+    .setDescription('퍼어엉~!\n아쉽네요.. 다음번에 도전하시길..'))
 }
