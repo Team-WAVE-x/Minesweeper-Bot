@@ -86,9 +86,11 @@ function create2DArray (rows, columns) {
 function spoilerMode(msg) {
   let description = ''
 
-  for (let i = 0; i < 10; i++)
+  for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++)
-      description += arr[i][j] === 0 ? int2Emoji(0) : spoiler(int2Emoji(arr[i][j])) + (j > 8 ? '\n' : '')
+      description += arr[i][j] === 0 ? int2Emoji(0) : spoiler(int2Emoji(arr[i][j]))
+    description += '\n'
+  }
   description += `\\💣 : ${bomb}개`
   msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (스포일러 모드)', description }))
 }
