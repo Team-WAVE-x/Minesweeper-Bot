@@ -1,10 +1,11 @@
 /* eslint-disable curly */
 const setting = require('./setting.json')
-const { Client, MessageEmbed } = require('discord.js')
+const { Client, MessageEmbed, DiscordAPIError } = require('discord.js')
 const client = new Client()
 const prefix = '!'
 
 const arr = create2DArray(10, 10)
+let bomb = 0
 const spoiler = (str) => `||${str}||`
 const int2Emoji = (int) => spoiler([':zero:', ':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':bomb:'][int])
 
@@ -14,27 +15,40 @@ function plusArr (i, j) {
     (!(arr[i][j] === 9))) arr[i][j]++
 }
 
+
 client.on('ready', () => console.log('--Start--'))
 client.on('message', (msg) => {
   if (msg.author.bot) return
   if (msg.content !== `${prefix}start`) return
 
-  let bomb = 0
+  msg.channel.send(new MessageEmbed()
+    .setTitle(":boom:지뢰찾기")
+    .setDescription("지뢰찾기 모드를 골라주세요!\n1. 스포일러 모드\n2. 확인 모드"))
+    .then(async (m) => {
+      m.react('1️⃣')
+      m.react('2️⃣')
+    })
+
+
+
+
 
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) arr[i][j] = 0
   }
 
+  // Create Bomb and Avoid duplication
   for (let i = 0; i < 10; i++) {
     let x = Math.floor(Math.random() * 10)
     let y = Math.floor(Math.random() * 10)
-    if (!(arr[x][y] === 9)) {
+    if (arr[x][y] === 9) i--
+    else {
       arr[x][y] = 9
       bomb++
     }
-    else i--
   }
 
+  // Increase elements around the bomb
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
       if (arr[i][j] === 9) {
@@ -50,13 +64,12 @@ client.on('message', (msg) => {
     }
   }
 
-  let description = ''
+})
 
-  for (let i = 0; i < 10; i++)
-    for (let j = 0; j < 10; j++)
-      description += int2Emoji(arr[i][j]) + (j > 8 ? '\n' : '')
-  description += `\\💣 : ${bomb}개`
-  msg.channel.send(new MessageEmbed({ title: '지뢰찾기', description }))
+client.on('messageReactionAdd', (react, user) => {
+  if (react.emoji.name == '1️⃣' && !user.bot){
+    spoilerMode(react.message)
+  }
 })
 
 client.login(setting.token)
@@ -68,4 +81,14 @@ function create2DArray (rows, columns) {
     arr[i] = new Array(columns)
   }
   return arr
+}
+
+function spoilerMode(msg){
+  let description = ''
+
+  for (let i = 0; i < 10; i++)
+    for (let j = 0; j < 10; j++)
+      description += int2Emoji(arr[i][j]) + (j > 8 ? '\n' : '')
+  description += `\\💣 : ${bomb}개`
+  msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (스포일러)', description }))
 }
