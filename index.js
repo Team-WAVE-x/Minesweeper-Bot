@@ -4,10 +4,14 @@ const { Client, MessageEmbed, DiscordAPIError, MessageCollector } = require('dis
 const client = new Client()
 const prefix = '!'
 
+const deadEmbed = new MessageEmbed().setTitle(':boom:펑!').setDescription('퍼어엉~!\n아쉽네요.. 다음번에 도전하시길..')
 const arr = create2DArray(10, 10)
 let bomb = 0
+
+
 const spoiler = (str) => `||${str}||`
 const int2Emoji = (int) => [':zero:', ':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':bomb:'][int]
+const dead = (msg) => msg.channel.send(deadEmbed)
 
 function plusArr (i, j) {
   if (
@@ -84,7 +88,7 @@ function spoilerMode(msg) {
 
   for (let i = 0; i < 10; i++)
     for (let j = 0; j < 10; j++)
-      description += spoiler(int2Emoji(arr[i][j]) + (j > 8 ? '\n' : ''))
+      description += arr[i][j] === 0 ? int2Emoji(0) : spoiler(int2Emoji(arr[i][j])) + (j > 8 ? '\n' : '')
   description += `\\💣 : ${bomb}개`
   msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (스포일러 모드)', description }))
 }
@@ -110,8 +114,5 @@ function confirmMode(msg) {
   })
 }
 
-function dead(msg) {
-  msg.channel.send(new MessageEmbed()
-    .setTitle(':boom:펑!')
-    .setDescription('퍼어엉~!\n아쉽네요.. 다음번에 도전하시길..'))
-}
+
+
