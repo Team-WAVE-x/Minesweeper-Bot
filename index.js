@@ -28,6 +28,9 @@ client.on('message', (msg) => {
     .then(async (m) => {
       m.react('1️⃣')
       m.react('2️⃣')
+      const reaction = (await m.awaitReactions((r, u) => u.id === msg.author.id && ['1️⃣', '2️⃣'].includes(r.emoji.name), { max: 1 })).first().emoji.name
+      if (reaction === '1️⃣') spoilerMode(m)
+      if (reaction === '2️⃣') confirmMode(m)
     })
 
   for (let i = 0; i < 10; i++) {
@@ -60,11 +63,6 @@ client.on('message', (msg) => {
       }
     }
   }
-})
-
-client.on('messageReactionAdd', (react, user) => {
-  if (react.emoji.name === '1️⃣' && !user.bot) spoilerMode(react.message)
-  else if (react.emoji.name === '2️⃣' && !user.bot) confirmMode(react.message)
 })
 
 client.login(setting.token)
