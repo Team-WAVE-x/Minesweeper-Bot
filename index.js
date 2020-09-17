@@ -1,6 +1,6 @@
 /* eslint-disable curly */
 const setting = require('./setting.json')
-const { Client, MessageEmbed, DiscordAPIError } = require('discord.js')
+const { Client, MessageEmbed, DiscordAPIError, MessageCollector } = require('discord.js')
 const client = new Client()
 const prefix = '!'
 
@@ -21,6 +21,7 @@ client.on('message', (msg) => {
   if (msg.author.bot) return
   if (msg.content !== `${prefix}start`) return
 
+
   msg.channel.send(new MessageEmbed()
     .setTitle(":boom:지뢰찾기")
     .setDescription("지뢰찾기 모드를 골라주세요!\n1. 스포일러 모드\n2. 확인 모드"))
@@ -28,10 +29,6 @@ client.on('message', (msg) => {
       m.react('1️⃣')
       m.react('2️⃣')
     })
-
-
-
-
 
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) arr[i][j] = 0
@@ -67,10 +64,13 @@ client.on('message', (msg) => {
 })
 
 client.on('messageReactionAdd', (react, user) => {
-  if (react.emoji.name == '1️⃣' && !user.bot){
+  if (react.emoji.name === '1️⃣' && !user.bot){
     spoilerMode(react.message)
+  } else if (react.emoji.name === '2️⃣' && !user.bot) {
+    confirmMode(react.message)
   }
 })
+
 
 client.login(setting.token)
 // client.login(process.env.token)
@@ -83,12 +83,29 @@ function create2DArray (rows, columns) {
   return arr
 }
 
-function spoilerMode(msg){
+function spoilerMode(msg) {
   let description = ''
 
   for (let i = 0; i < 10; i++)
     for (let j = 0; j < 10; j++)
       description += int2Emoji(arr[i][j]) + (j > 8 ? '\n' : '')
   description += `\\💣 : ${bomb}개`
-  msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (스포일러)', description }))
+  msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (스포일러 모드)', description }))
+}
+
+function confirmMode(msg) {
+  msg.channel.send(new MessageEmbed({ title: '지뢰찾기 (확인 모드)', description: '`!확인 (x좌표) (y좌표)`로 그 곳이 어느 숫자인지 살펴보세요!' }))
+  const filter = m => m.content.startsWith(`${prefix}확인`)
+  const collector = msg.channel.createMessageCollector(filter, { time: 150000 });
+  collector.on('collect', m => {
+    let x = m.content.split(' ')[1]
+    let y = m.content.split(' ')[2]
+    m.channel.send(int2Emoji(arr[y][x]))
+  })
+
+  collector.on('end', (collected) => {
+    msg.channel.send(new MessageEmbed()
+      .setTitle('끝')
+      .setDescription('끝입니다'))
+  })
 }
