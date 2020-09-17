@@ -19,15 +19,24 @@ client.on('message', (msg) => {
   if (msg.author.bot) return
   if (msg.content !== `${prefix}start`) return
 
-  for (let i = 0; i < 10; i++)
-    for (let j = 0; j < 10; j++)
-      arr[i][j] = 0
+  let bomb = 0
 
-  for (let i = 0; i < 10; i++)
-    arr[Math.floor(Math.random() * 10)][Math.floor(Math.random() * 10)] = 9
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) arr[i][j] = 0
+  }
 
-  for (let i = 0; i < 10; i++)
-    for (let j = 0; j < 10; j++)
+  for (let i = 0; i < 10; i++) {
+    let x = Math.floor(Math.random() * 10)
+    let y = Math.floor(Math.random() * 10)
+    if (!(arr[x][y] === 9)) {
+      arr[x][y] = 9
+      bomb++
+    }
+    else i--
+  }
+
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
       if (arr[i][j] === 9) {
         plusArr(i + 1, j)
         plusArr(i + 1, j + 1)
@@ -38,13 +47,15 @@ client.on('message', (msg) => {
         plusArr(i, j + 1)
         plusArr(i, j - 1)
       }
+    }
+  }
 
   let description = ''
 
   for (let i = 0; i < 10; i++)
     for (let j = 0; j < 10; j++)
       description += int2Emoji(arr[i][j]) + (j > 8 ? '\n' : '')
-
+  description += `\\💣 : ${bomb}개`
   msg.channel.send(new MessageEmbed({ title: '지뢰찾기', description }))
 })
 
