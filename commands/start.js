@@ -117,4 +117,4 @@ function confirmMode (msg) {
 }
 
 module.exports = fn
-module.exports.aliases = ['ping', '', 'pong']
+module.exports.aliases = ['start', '지뢰찾기', '시작']
